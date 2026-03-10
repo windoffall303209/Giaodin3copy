@@ -1,0 +1,124 @@
+<%- include('../partials/header') %>
+
+<!-- Load Product Detail CSS -->
+<link rel="stylesheet" href="/css/product-detail.css">
+
+<div class="product-detail-page">
+    <div class="container">
+        <div class="product-detail-grid">
+            <!-- Product Images Gallery -->
+            <div class="product-gallery">
+                <!-- Main Image -->
+                <div class="product-gallery__main">
+                    <% 
+                    let mainImage = product.primary_image;
+                    if (!mainImage && product.images && product.images.length > 0) {
+                        mainImage = product.images[0].image_url;
+                    }
+                    %>
+                    <% if (mainImage) { %>
+                        <img src="<%= mainImage %>" 
+                             alt="<%= product.name %>" 
+                             class="product-gallery__main-image"
+                             id="mainImage"
+                             onerror="this.style.display='none'; document.getElementById('fallbackIcon').style.display='flex';">
+                        <div id="fallbackIcon" class="product-gallery__fallback">
+                            <span class="product-gallery__fallback-icon">👕</span>
+                        </div>
+                    <% } else { %>
+                        <div class="product-gallery__placeholder">
+                            <span class="product-gallery__placeholder-icon">👕</span>
+                        </div>
+                    <% } %>
+                    
+                    <% if (product.images && product.images.length > 1) { %>
+                        <!-- Navigation Arrows -->
+                        <button onclick="prevImage()" class="product-gallery__nav-btn product-gallery__nav-btn--prev">❮</button>
+                        <button onclick="nextImage()" class="product-gallery__nav-btn product-gallery__nav-btn--next">❯</button>
+                        
+                        <!-- Image Counter -->
+                        <div class="product-gallery__counter">
+                            <span id="currentIndex">1</span> / <%= product.images.length %>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <!-- Thumbnail Gallery -->
+                <% if (product.images && product.images.length > 1) { %>
+                    <div class="product-gallery__thumbs">
+                        <% product.images.forEach((img, index) => { %>
+                            <img src="<%= img.image_url %>" 
+                                 alt="<%= product.name %> - <%= index + 1 %>"
+                                 class="product-gallery__thumb <%= index === 0 ? 'product-gallery__thumb--active' : '' %>"
+                                 data-index="<%= index %>"
+                                 onclick="selectImage(<%= index %>, '<%= img.image_url %>')">
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+            
+            <!-- Product Info -->
+            <div class="product-info">
+                <h1 class="product-info__title"><%= product.name %></h1>
+                
+                <% if (product.category_name) { %>
+                    <p class="product-info__category">
+                        Danh mục: <a href="/products/category/<%= product.category_slug %>" class="product-info__category-link"><%= product.category_name %></a>
+                    </p>
+                <% } %>
+                
+                <div class="product-info__price-box">
+                    <% if (product.price !== product.final_price && product.final_price) { %>
+                        <p class="product-info__price-original">
+                            <%= product.price.toLocaleString('vi-VN') %>đ
+                        </p>
+                        <p class="product-info__price-current">
+                            <%= product.final_price.toLocaleString('vi-VN') %>đ
+                        </p>
+                        <span class="product-info__discount-badge">
+                            Giảm <%= Math.round((1 - product.final_price / product.price) * 100) %>%
+                        </span>
+                    <% } else { %>
+                        <p class="product-info__price-current">
+                            <%= (product.final_price || product.price).toLocaleString('vi-VN') %>đ
+                        </p>
+                    <% } %>
+                </div>
+                
+                <% if (product.description) { %>
+                    <div class="product-info__description">
+                        <h3 class="product-info__description-title">Mô tả sản phẩm</h3>
+                        <p class="product-info__description-text"><%= product.description %></p>
+                    </div>
+                <% } %>
+                
+                <div class="product-info__actions">
+                    <button onclick="addToCart(<%= product.id %>)" class="btn product-info__action-btn product-info__action-btn--cart">
+                        🛒 Thêm vào giỏ hàng
+                    </button>
+                    <button onclick="buyNow(<%= product.id %>)" class="product-info__action-btn product-info__action-btn--buy">
+                        ⚡ Mua ngay
+                    </button>
+                </div>
+                
+                <div class="product-info__benefits">
+                    <p class="product-info__benefit">
+                        <span>✅</span> Miễn phí vận chuyển với đơn từ 500.000đ
+                    </p>
+                    <p class="product-info__benefit">
+                        <span>🔄</span> Đổi trả miễn phí trong 30 ngày
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/main.js"></script>
+<script src="/js/product-detail.js"></script>
+<script>
+// Initialize gallery with product images
+initProductGallery([<% if (product.images && product.images.length > 0) { product.images.forEach((img, i) => { %>'<%= img.image_url %>'<% if (i < product.images.length - 1) { %>, <% } }); } %>]);
+</script>
+
+<%- include('../partials/footer') %>
